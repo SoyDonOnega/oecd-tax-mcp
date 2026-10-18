@@ -27,29 +27,19 @@ For heavy multi-country SQL spillover, `cyanheads/oecd-mcp-server` remains optio
 ## Install
 
 ```bash
-cd "…/Developer/Solutions/oecd-tax-mcp"
-uv sync
+gh repo clone SoyDonOnega/oecd-tax-mcp ~/src/oecd-tax-mcp
+cd ~/src/oecd-tax-mcp && uv sync
 ```
 
-## Cursor MCP config
+## Register in Claude Code
 
-Add to your MCP settings (path adjust to your machine):
+User scope (every session):
 
-```json
-{
-  "mcpServers": {
-    "oecd-tax": {
-      "command": "uv",
-      "args": [
-        "--directory",
-        "/Users/One/Library/CloudStorage/GoogleDrive-noonebutonega@gmail.com/My Drive/Obsidian/Developer/Solutions/oecd-tax-mcp",
-        "run",
-        "oecd-tax-mcp"
-      ]
-    }
-  }
-}
+```bash
+claude mcp add-json -s user oecd-tax '{"type":"stdio","command":"uv","args":["--directory","/Users/One/src/oecd-tax-mcp","run","oecd-tax-mcp"]}'
 ```
+
+Any other MCP client: same command (`uv --directory <clone> run oecd-tax-mcp`) as a stdio server.
 
 Optional env:
 
@@ -63,7 +53,7 @@ Optional env:
 
 ## Logo
 
-Server icon: `assets/logo.png` (also packaged under `src/oecd_tax_mcp/assets/`). Exposed via MCP `serverInfo.icons` (PNG data URI). Cursor’s MCP list may still show a letter fallback — other clients / MCP Inspector can render it.
+Server icon: `assets/logo.png` (also packaged under `src/oecd_tax_mcp/assets/`). Exposed via MCP `serverInfo.icons` (PNG data URI). Some clients show a letter fallback; MCP Inspector renders it.
 
 Code: MIT. OECD publications remain under OECD terms — attribute the source; do not republish wholesale. Read-only local cache for agent use.
 
