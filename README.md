@@ -19,6 +19,7 @@ For heavy multi-country SQL spillover, `cyanheads/oecd-mcp-server` remains optio
 | --- | --- |
 | `oecd_tax_health` | Soft-law + SDMX status |
 | `oecd_tax_list` / `search` / `resolve` / `get` | Soft-law PDF lane |
+| `oecd_tax_fetch` | Any OECD PDF by direct URL (https on `oecd.org` only, also after redirects), outside the catalogue |
 | `oecd_stats_agencies` | SDMX agencies + counts |
 | `oecd_stats_search` | Search dataflows (`tax_focus` default true) |
 | `oecd_stats_dataflow` | Metadata for one `flow_ref` |
@@ -50,6 +51,8 @@ Optional env:
 1. `oecd_tax_search("DEMPE")` or `oecd_tax_resolve("oecd:tpg-2022")`
 2. `oecd_tax_get("oecd:tpg-2022", query="6.32")` or paginate with `page` / `max_chars`
 3. Cite with `cite_as` + pinpoint; keep soft-law classification (guideline / model instrument)
+
+Not in the catalogue: find the PDF URL first (e.g. web search), then `oecd_tax_fetch(url, query="…")`. It takes PDF URLs only: DOIs and `oecd.org` HTML pages redirect to Cloudflare-blocked pages. The title comes from the PDF metadata or the file name, so check it against the cover before citing.
 
 ## Skill: taxmotion
 

@@ -6,6 +6,7 @@ import hashlib
 import os
 import re
 from pathlib import Path
+from urllib.parse import urlparse
 
 import httpx
 from pypdf import PdfReader
@@ -27,7 +28,17 @@ def _cache_path(url: str) -> Path:
     return cache_dir() / f"{digest}.pdf"
 
 
+def is_oecd_url(url: str) -> bool:
+    """True for https URLs on oecd.org or one of its subdomains."""
+    parsed = urlparse(str(url))
+    host = (parsed.hostname or "").lower()
+    return parsed.scheme == "https" and (host == "oecd.org" or host.endswith(".oecd.org"))
+
+
 def fetch_pdf(url: str, *, force: bool = False) -> Path:
+    # Boundary: this MCP fetches OECD only, before and after redirects.
+    if not is_oecd_url(url):
+        raise ValueError(f"Not an OECD URL (https on oecd.org only): {url}")
     dest = _cache_path(url)
     if dest.exists() and not force and dest.stat().st_size > 0:
         return dest
@@ -38,6 +49,8 @@ def fetch_pdf(url: str, *, force: bool = False) -> Path:
     ) as client:
         resp = client.get(url)
         resp.raise_for_status()
+        if not is_oecd_url(resp.url):
+            raise ValueError(f"Redirected outside oecd.org: {resp.url}")
         ctype = (resp.headers.get("content-type") or "").lower()
         if "pdf" not in ctype and not url.lower().endswith(".pdf"):
             raise ValueError(
@@ -46,6 +59,13 @@ def fetch_pdf(url: str, *, force: bool = False) -> Path:
             )
         dest.write_bytes(resp.content)
     return dest
+
+
+def pdf_title(pdf_path: Path) -> str | None:
+    """Title from the PDF's own metadata, if it has one."""
+    meta = PdfReader(str(pdf_path)).metadata
+    title = (meta.title or "").strip() if meta else ""
+    return title or None
 
 
 def extract_text(pdf_path: Path, *, max_pages: int | None = None) -> str:

@@ -23,7 +23,9 @@ from oecd_tax_mcp.fetch import (
     extract_text,
     fetch_pdf,
     find_snippets,
+    is_oecd_url,
     paginate,
+    pdf_title,
 )
 from oecd_tax_mcp.icons import server_icons
 from oecd_tax_mcp.store import list_snapshots, load_snapshot, save_snapshot
@@ -34,6 +36,9 @@ mcp = FastMCP(
     instructions=(
         "OECD MCP — two lanes + derivation:\n"
         "1) Soft-law docs: oecd_tax_search/resolve/get (curated free PDFs). Soft law ≠ treaty.\n"
+        "   Any other OECD PDF: oecd_tax_fetch(url) — direct PDF URL on oecd.org "
+        "(usually /content/dam/…). Find the URL first (e.g. web search); DOI and HTML "
+        "pages are Cloudflare-blocked.\n"
         "2) Statistics: oecd_stats_* via public SDMX (tax hub OECD.CTP.TPS).\n"
         "3) Derive: oecd_stats_derive from saved snapshots (yoy/compare/ratio/rank/summary/"
         "per_external). Every row carries provenance.\n"
@@ -78,7 +83,13 @@ def oecd_tax_health() -> str:
                 "to oecd_stats_derive (not via this MCP)."
             ),
             "lanes": {
-                "docs": ["oecd_tax_list", "oecd_tax_search", "oecd_tax_resolve", "oecd_tax_get"],
+                "docs": [
+                    "oecd_tax_list",
+                    "oecd_tax_search",
+                    "oecd_tax_resolve",
+                    "oecd_tax_get",
+                    "oecd_tax_fetch",
+                ],
                 "stats": [
                     "oecd_stats_agencies",
                     "oecd_stats_search",
@@ -219,6 +230,12 @@ def oecd_tax_get(
         "provenance": provenance,
     }
 
+    return _text_payload(base, text, query=query, max_chars=max_chars, page=page)
+
+
+def _text_payload(
+    base: dict[str, Any], text: str, *, query: str | None, max_chars: int, page: int
+) -> str:
     if query:
         snippets = find_snippets(text, query)
         base.update(
@@ -234,6 +251,58 @@ def oecd_tax_get(
     chunk, page_meta = paginate(text, max_chars=max_chars, page=page)
     base.update({"mode": "page", "text": chunk, **page_meta})
     return _ok(base)
+
+
+@mcp.tool()
+def oecd_tax_fetch(
+    url: str,
+    query: str | None = None,
+    max_chars: int = 12000,
+    page: int = 1,
+    force_download: bool = False,
+) -> str:
+    """Download (cached) any OECD PDF by direct URL, outside the catalogue, with provenance.
+
+    Only https PDFs on oecd.org (usually /content/dam/…). Find the URL first, e.g. with
+    web search; DOI and HTML pages are Cloudflare-blocked. Same query/page modes as oecd_tax_get.
+    """
+    if not is_oecd_url(url):
+        return _ok(
+            {
+                "verified": False,
+                "url": url,
+                "error": "not_oecd_url",
+                "hint": "Only https PDF URLs on oecd.org. This MCP fetches OECD only.",
+            }
+        )
+    try:
+        path = fetch_pdf(url, force=force_download)
+        title = pdf_title(path)
+        text = extract_text(path)
+    except Exception as exc:  # noqa: BLE001
+        return _ok(
+            {
+                "verified": False,
+                "url": url,
+                "error": "fetch_or_extract_failed",
+                "detail": str(exc),
+            }
+        )
+
+    title = title or url.rsplit("/", 1)[-1]
+    provenance = prov.primary_pdf(instrument_id=None, title=title, pdf_url=url)
+    base = {
+        "verified": True,
+        "catalogued": False,
+        "title": title,
+        "title_source": "PDF metadata or file name — check against the document's cover",
+        "cite_as": provenance["cite"],
+        "source_url": url,
+        "cached_pdf": str(path),
+        "jurisdiction": "OECD/international",
+        "provenance": provenance,
+    }
+    return _text_payload(base, text, query=query, max_chars=max_chars, page=page)
 
 
 # --- SDMX statistics lane -------------------------------------------------

@@ -51,7 +51,7 @@ def primary_sdmx(
 
 def primary_pdf(
     *,
-    instrument_id: str,
+    instrument_id: str | None,
     title: str,
     pdf_url: str,
     doi: str | None = None,
