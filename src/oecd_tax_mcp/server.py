@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
 from typing import Any
 
 from mcp.server.fastmcp import FastMCP
@@ -39,7 +40,9 @@ mcp = FastMCP(
         "BOUNDARY: this MCP fetches OECD only. Other official inputs (INE population, "
         "Eurostat, AEAT, …) must be supplied by the agent as external_inputs with cite + "
         "source_url — never invent them and never expect this MCP to download them.\n"
-        "Always distinguish primary OECD vs derived vs external_official in citations."
+        "Always distinguish primary OECD vs derived vs external_official in citations.\n"
+        "Skill: the `taxmotion` prompt (and skill://taxmotion/* resources) turns a tax term "
+        "into an animated HTML explainer sourced through this MCP."
     ),
 )
 
@@ -456,6 +459,33 @@ def oecd_stats_derive(
             }
         )
     return _ok(result)
+
+
+_TAXMOTION = Path(__file__).parent / "skills" / "taxmotion"
+
+
+@mcp.resource("skill://taxmotion/SKILL.md", mime_type="text/markdown")
+def taxmotion_skill() -> str:
+    """Taxmotion skill: workflow, accuracy rules, house style and HTML engine for tax-term motions."""
+    return (_TAXMOTION / "SKILL.md").read_text(encoding="utf-8")
+
+
+@mcp.resource("skill://taxmotion/examples/tcf.html", mime_type="text/html")
+def taxmotion_example() -> str:
+    """Reference motion of the series (Tax Control Frameworks, Spanish)."""
+    return (_TAXMOTION / "examples" / "tcf.html").read_text(encoding="utf-8")
+
+
+@mcp.prompt(name="taxmotion", description="Crea un motion animado que explica un término fiscal")
+def taxmotion_prompt(termino: str, idioma: str = "español") -> str:
+    """Load the taxmotion skill and apply it to one tax term."""
+    return (
+        f"Crea un motion taxmotion sobre «{termino}», con el texto en pantalla en {idioma}. "
+        "Sigue estas instrucciones al pie de la letra. Usa las herramientas oecd_tax_* y "
+        "oecd_stats_* de este MCP como fuente, y lee el recurso "
+        "skill://taxmotion/examples/tcf.html como patrón si tu cliente lo permite.\n\n"
+        + taxmotion_skill()
+    )
 
 
 def main() -> None:

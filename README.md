@@ -51,6 +51,15 @@ Optional env:
 2. `oecd_tax_get("oecd:tpg-2022", query="6.32")` or paginate with `page` / `max_chars`
 3. Cite with `cite_as` + pinpoint; keep soft-law classification (guideline / model instrument)
 
+## Skill: taxmotion
+
+Turns a tax term into an animated HTML explainer (1920x1080) sourced through this MCP. It ships inside the package and the server exposes it as:
+
+- the MCP prompt `taxmotion` (`termino`, optional `idioma`); in Claude Code: `/mcp__oecd-tax__taxmotion DEMPE`;
+- the resources `skill://taxmotion/SKILL.md` and `skill://taxmotion/examples/tcf.html`.
+
+To have it trigger on its own in Claude Code, also copy it as a skill: `cp -R src/oecd_tax_mcp/skills/taxmotion ~/.claude/skills/`. Details in `src/oecd_tax_mcp/skills/taxmotion/README.md`.
+
 ## Logo
 
 Server icon: `assets/logo.png` (also packaged under `src/oecd_tax_mcp/assets/`). Exposed via MCP `serverInfo.icons` (PNG data URI). Some clients show a letter fallback; MCP Inspector renders it.
