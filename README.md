@@ -53,9 +53,9 @@ Optional env:
 
 ## Skill: taxmotion
 
-Turns a tax term into an animated HTML explainer (1920x1080) sourced through this MCP. It ships inside the package and the server exposes it as:
+Turns a tax term into an animated HTML explainer (1920x1080) sourced through this MCP, in the language the user writes in. It ships inside the package and the server exposes it as:
 
-- the MCP prompt `taxmotion` (`termino`, optional `idioma`); in Claude Code: `/mcp__oecd-tax__taxmotion DEMPE`;
+- the MCP prompt `taxmotion` (`term`, optional `language`); in Claude Code: `/mcp__oecd-tax__taxmotion DEMPE`;
 - the resources `skill://taxmotion/SKILL.md` and `skill://taxmotion/examples/tcf.html`.
 
 To have it trigger on its own in Claude Code, also copy it as a skill: `cp -R src/oecd_tax_mcp/skills/taxmotion ~/.claude/skills/`. Details in `src/oecd_tax_mcp/skills/taxmotion/README.md`.

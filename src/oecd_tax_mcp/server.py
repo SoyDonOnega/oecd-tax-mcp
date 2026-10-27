@@ -476,14 +476,19 @@ def taxmotion_example() -> str:
     return (_TAXMOTION / "examples" / "tcf.html").read_text(encoding="utf-8")
 
 
-@mcp.prompt(name="taxmotion", description="Crea un motion animado que explica un término fiscal")
-def taxmotion_prompt(termino: str, idioma: str = "español") -> str:
+@mcp.prompt(name="taxmotion", description="Create an animated motion that explains a tax term")
+def taxmotion_prompt(term: str, language: str = "") -> str:
     """Load the taxmotion skill and apply it to one tax term."""
+    lang = (
+        f"with the on-screen text in {language}"
+        if language
+        else "with the on-screen text in the language the user writes in"
+    )
     return (
-        f"Crea un motion taxmotion sobre «{termino}», con el texto en pantalla en {idioma}. "
-        "Sigue estas instrucciones al pie de la letra. Usa las herramientas oecd_tax_* y "
-        "oecd_stats_* de este MCP como fuente, y lee el recurso "
-        "skill://taxmotion/examples/tcf.html como patrón si tu cliente lo permite.\n\n"
+        f"Create a taxmotion motion about \"{term}\", {lang}. "
+        "Follow these instructions exactly. Use this MCP's oecd_tax_* and oecd_stats_* "
+        "tools as the source, and read the resource skill://taxmotion/examples/tcf.html "
+        "as the pattern if your client allows it.\n\n"
         + taxmotion_skill()
     )
 

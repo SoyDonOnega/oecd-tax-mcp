@@ -1,21 +1,21 @@
 # taxmotion
 
-Skill para crear motions explicativos de términos fiscales (HTML animado 1920x1080) con el estilo de la serie *GloBE in Five Steps* / *Tax Control Frameworks*, usando este MCP como fuente.
+Skill that creates explainer motions of tax terms (animated 1920x1080 HTML) in the style of the *GloBE in Five Steps* / *Tax Control Frameworks* series, with this MCP as the source. The motion is written in the language the user writes in.
 
-- `SKILL.md`: flujo término → guion → HTML, reglas de rigor (fuentes OCDE, marcar lo ilustrativo), estilo, plantilla completa del motor y exportación a vídeo (captura con Playwright o Remotion).
-- `examples/tcf.html`: motion de referencia (Tax Control Frameworks, en español).
+- `SKILL.md`: term → script → HTML workflow, output-language rule, accuracy rules (OECD sources, mark what is illustrative), style, full engine template and video export (Playwright capture or Remotion).
+- `examples/tcf.html`: reference motion (Tax Control Frameworks, in Spanish).
 
-## Cómo se usa
+## How to use it
 
-**Desde el MCP (sin instalar nada más).** El servidor `oecd-tax` expone:
+**From the MCP (nothing else to install).** The `oecd-tax` server exposes:
 
-- el prompt `taxmotion` (argumentos `termino` y, opcional, `idioma`). En Claude Code aparece como `/mcp__oecd-tax__taxmotion DEMPE`; en Claude Desktop, en el menú de prompts del conector.
-- los recursos `skill://taxmotion/SKILL.md` y `skill://taxmotion/examples/tcf.html`.
+- the `taxmotion` prompt (argument `term` and, optionally, `language`; without it, the motion follows the language of the conversation). In Claude Code it shows up as `/mcp__oecd-tax__taxmotion DEMPE`; in Claude Desktop, in the connector's prompt menu.
+- the resources `skill://taxmotion/SKILL.md` and `skill://taxmotion/examples/tcf.html`.
 
-**Como skill de Claude Code** (para que se active sola cuando pidas "hazme un motion sobre…"):
+**As a Claude Code skill** (so it triggers by itself when you ask "make me a motion about…"):
 
 ```bash
 mkdir -p ~/.claude/skills && cp -R src/oecd_tax_mcp/skills/taxmotion ~/.claude/skills/
 ```
 
-Luego `/taxmotion DEMPE`.
+Then `/taxmotion DEMPE`.
