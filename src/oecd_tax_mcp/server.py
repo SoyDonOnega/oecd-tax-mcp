@@ -29,7 +29,7 @@ from oecd_tax_mcp.icons import server_icons
 from oecd_tax_mcp.store import list_snapshots, load_snapshot, save_snapshot
 
 mcp = FastMCP(
-    "oecd-tax",
+    "OECD Tax",
     icons=server_icons() or None,
     instructions=(
         "OECD MCP — two lanes + derivation:\n"
