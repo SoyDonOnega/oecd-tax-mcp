@@ -1,9 +1,9 @@
 ---
-name: motion-fiscal
+name: taxmotion
 description: Crea un motion explicativo (vídeo HTML animado 1920x1080) que ilustra un término fiscal, con el estilo de la serie GloBE/TCF y fuentes OCDE verificadas. Úsala cuando pidan un motion, vídeo, animación o visual de un concepto tributario.
 ---
 
-# Motion fiscal
+# Taxmotion
 
 Convierte un término fiscal (GloBE, TCF, DEMPE, establecimiento permanente, CbCR…) en un motion de 45 a 75 segundos: una sola página HTML autocontenida, 1920x1080, donde cada fotograma es una función pura del tiempo `t`. Toda la serie comparte el mismo motor y el mismo aspecto, así que un motion nuevo se reconoce como parte de la colección.
 
@@ -64,7 +64,7 @@ Referencias de la serie: `GloBE in Five Steps` (inglés, Pilar Dos) y `examples/
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
-/* Serie motion fiscal: un escenario 1920x1080, cada fotograma es función pura de t. Tema claro fijo. */
+/* Serie taxmotion: un escenario 1920x1080, cada fotograma es función pura de t. Tema claro fijo. */
 :root {
   --bg: #FAFAF8; --ink: #0A0A0A; --mute: #666666; --line: #CCCCCC; --paper: #FFFFFF;
   --sans: "Inter", "Helvetica Neue", Arial, sans-serif;
