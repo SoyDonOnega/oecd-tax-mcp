@@ -51,6 +51,10 @@ Optional env:
 2. `oecd_tax_get("oecd:tpg-2022", query="6.32")` or paginate with `page` / `max_chars`
 3. Cite with `cite_as` + pinpoint; keep soft-law classification (guideline / model instrument)
 
+## Companion skill: motion-fiscal
+
+`skills/motion-fiscal/` is a Claude skill that turns a tax term into an animated HTML explainer (1920x1080) sourced through this MCP. See its README to install it.
+
 ## Logo
 
 Server icon: `assets/logo.png` (also packaged under `src/oecd_tax_mcp/assets/`). Exposed via MCP `serverInfo.icons` (PNG data URI). Some clients show a letter fallback; MCP Inspector renders it.
