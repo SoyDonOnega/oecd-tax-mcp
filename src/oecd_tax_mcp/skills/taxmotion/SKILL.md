@@ -1,70 +1,80 @@
 ---
 name: taxmotion
-description: Crea un motion explicativo (vídeo HTML animado 1920x1080) que ilustra un término fiscal, con el estilo de la serie GloBE/TCF y fuentes OCDE verificadas. Úsala cuando pidan un motion, vídeo, animación o visual de un concepto tributario.
+description: Creates an explainer motion (animated 1920x1080 HTML video) that illustrates a tax term, in the style of the GloBE/TCF series and with verified OECD sources. Use it when someone asks for a motion, video, animation or visual of a tax concept. The motion is written in the language the user writes in.
 ---
 
 # Taxmotion
 
-Convierte un término fiscal (GloBE, TCF, DEMPE, establecimiento permanente, CbCR…) en un motion de 45 a 75 segundos: una sola página HTML autocontenida, 1920x1080, donde cada fotograma es una función pura del tiempo `t`. Toda la serie comparte el mismo motor y el mismo aspecto, así que un motion nuevo se reconoce como parte de la colección.
+Turns a tax term (GloBE, TCF, DEMPE, permanent establishment, CbCR…) into a motion of 45 to 75 seconds: one self-contained HTML page, 1920x1080, where each frame is a pure function of time `t`. The whole series shares the same engine and the same look, so a new motion reads as part of the collection.
 
-Referencias de la serie: `GloBE in Five Steps` (inglés, Pilar Dos) y `examples/tcf.html` (español, Tax Control Frameworks). Si tienes acceso a `examples/tcf.html`, léelo antes de escribir: es el patrón canónico.
+Series references: `GloBE in Five Steps` (English, Pillar Two) and `examples/tcf.html` (Spanish, Tax Control Frameworks). If you can read `examples/tcf.html`, read it before you write: it is the canonical pattern. Copy its structure and engine, not its language.
 
-## Flujo: del término al motion
+## Output language
 
-1. **Fija el término y el idioma.** Por defecto, español en pantalla. Nombre oficial en inglés como etiqueta secundaria (`.lab` o `.en`) cuando el término nace en un texto OCDE.
-2. **Investiga con fuentes primarias.**
-   - Si el MCP `oecd-tax` está conectado: `oecd_tax_search("<término>")` → `oecd_tax_resolve(id)` → `oecd_tax_get(id, query="<artículo o párrafo>")`. Para cifras, `oecd_stats_search` / `oecd_stats_query` (agencia `OECD.CTP.TPS`). Anota `cite_as` y el pinpoint (artículo, párrafo, página).
-   - IDs útiles del catálogo: `oecd:pillar2-nutshell`, `oecd:pillar2-commentary-2022`, `oecd:pillar2-ag-2023-07`, `oecd:pillar2-handbook`, `oecd:tpg-2022`, `oecd:mtc-2017-condensed`, `oecd:coop-compliance-2013`, `oecd:tax-intermediaries-2008`, `oecd:tax-coop-progress-2024`.
-   - Sin MCP: usa los PDF oficiales de la OCDE (o de la administración nacional: AEAT, BOE, UNE…) y dilo en la entrega. Nunca presentes como "recuperado vía MCP" algo que viene de memoria.
-3. **Escribe el guion de escenas antes del HTML.** Una tabla con: escena, segundos `[inicio, fin]`, eyebrow, titular, qué se mueve, fuente. Forma típica (5 o 6 escenas):
-   - **S0 Gancho (5 a 7 s):** una cifra o sigla gigante (380px) + definición en una frase.
-   - **S1 Contexto:** el problema que resuelve o los actores (cajas + flechas).
-   - **S2 Mecánica:** los pasos, bloques o fórmula. Un elemento cada 3 a 4,5 s, resaltado de uno en uno.
-   - **S3 Consecuencia:** comparación antes/después, línea de tiempo o ejemplo numérico.
-   - **S4 Aterrizaje:** cómo se aplica en España (o la jurisdicción pedida), con años y normas.
-   - **Cierre:** una frase que resume la idea, con borde superior negro de 2px.
-4. **Construye el HTML** copiando la plantilla de abajo, sin tocar el motor. Solo cambias `<title>`, las escenas, la constante `T` y el `max` del deslizador.
-5. **Verifica:** abre con `?render`, llama a `seek(t)` en 5 o 6 instantes clave por escena y comprueba que no hay textos solapados ni fuera del lienzo (margen lateral 140px, nada por debajo de la `.rule` salvo `.src` y `.tag`). Comprueba que cada cifra y cada cita coinciden con la fuente.
-6. **Entrega:** publícalo como Artifact (o guarda el `.html` donde pidan) y lista las fuentes usadas y qué partes son ilustrativas.
+- **Write every word on screen in the language the user writes in.** If the user explicitly asks for another language, use that one. Ignore the language of the sources and of these instructions.
+- This covers headlines, labels, `.src` connectors, `.tag` texts, the closing line and the player UI (play/pause button, timeline `aria-label`, clock, keyboard hint).
+- When the output language is not English and the term comes from an OECD text, show the official English name as a secondary label (`.lab` or `.en`).
+- Keep official document titles, article numbers and acronyms as published (`Model Rules Art. 5.2.1`, `CbCR`).
+- Number and date formats follow the output language (`EUR 750 m` / `750 M EUR`, `1.5` / `1,5`).
 
-## Reglas de rigor
+## Workflow: from term to motion
 
-- **Cada escena con contenido normativo lleva `.src`** abajo a la izquierda, en mono: documento + pinpoint. Ej.: `Model Rules Art. 5.2.1 · Commentary on Art. 5.2.1, para. 15`, `OCDE FTA (2016), cap. 3`.
-- **Lo ilustrativo se marca** con `.tag` abajo a la derecha: `Esquema, no datos`, `Datos de ejemplo · EUR m`, `Orden de las reglas`. Cualquier cifra inventada para un ejemplo lleva `Datos de ejemplo`. Los plazos esquemáticos se mencionan también en `.hint`.
-- **Soft law no es norma vinculante.** Las directrices OCDE se presentan como guía o modelo; si hablas de obligación, cita la norma nacional o la directiva UE que la incorpora.
-- **Sin cifras de memoria** si hay forma de comprobarlas. Umbrales, tipos y fechas se verifican en la fuente antes de animarlos. Si no se pudieron verificar, dilo en la entrega.
-- **Fecha de recuperación** en la última escena cuando uses el MCP: `Recuperado el <fecha> vía oecd-tax MCP`.
-- No reproduzcas párrafos largos de la OCDE: parafrasea y atribuye.
+1. **Fix the term and the output language** (see above).
+2. **Research with primary sources.**
+   - If the `oecd-tax` MCP is connected: `oecd_tax_search("<term>")` → `oecd_tax_resolve(id)` → `oecd_tax_get(id, query="<article or paragraph>")`. For figures, `oecd_stats_search` / `oecd_stats_query` (agency `OECD.CTP.TPS`). Write down `cite_as` and the pinpoint (article, paragraph, page).
+   - Useful catalogue ids: `oecd:pillar2-nutshell`, `oecd:pillar2-commentary-2022`, `oecd:pillar2-ag-2023-07`, `oecd:pillar2-handbook`, `oecd:tpg-2022`, `oecd:mtc-2017-condensed`, `oecd:coop-compliance-2013`, `oecd:tax-intermediaries-2008`, `oecd:tax-coop-progress-2024`.
+   - Without the MCP: use the official OECD PDFs (or the national administration's: AEAT, BOE, UNE…) and say so in the delivery. Never present something from memory as "retrieved via MCP".
+3. **Write the scene script before the HTML.** A table with: scene, seconds `[start, end]`, eyebrow, headline, what moves, source. Typical shape (5 or 6 scenes):
+   - **S0 Hook (5 to 7 s):** one giant figure or acronym (380px) + a one-sentence definition.
+   - **S1 Context:** the problem it solves or the actors (boxes + arrows).
+   - **S2 Mechanics:** the steps, blocks or formula. One element every 3 to 4.5 s, highlighted one at a time.
+   - **S3 Consequence:** before/after comparison, timeline or numeric example.
+   - **S4 Landing:** how it applies in Spain (or the jurisdiction the user asks for), with years and rules.
+   - **Close:** one sentence that sums up the idea, with a 2px black top border.
+4. **Build the HTML** by copying the template below without touching the engine. Change only `<title>`, the scenes, the constant `T`, the slider `max` and the UI strings (into the output language).
+5. **Verify:** open with `?render`, call `seek(t)` at 5 or 6 key moments per scene and check that no text overlaps or leaves the canvas (140px side margin, nothing below the `.rule` except `.src` and `.tag`). Check that every figure and every citation matches the source.
+6. **Deliver:** publish it as an Artifact (or save the `.html` where asked) and list the sources used and which parts are illustrative.
 
-## Estilo visual (fijo para toda la serie)
+## Accuracy rules
 
-- Fondo `#FAFAF8`, tinta `#0A0A0A`, gris `#666666`, líneas `#CCCCCC`, papel `#FFFFFF`. Un único tema claro; nada de color de acento.
-- Tipos: Inter (400/500/600) para texto, JetBrains Mono para fuentes, años, etiquetas técnicas y cifras de apoyo. `font-feature-settings: "tnum"`.
-- Rejilla: margen 140px a izquierda y derecha. Eyebrow en `top:96px`, titular en `top:190px`, `.rule` a 140px del fondo, `.src`/`.tag` a 84px del fondo.
-- Jerarquía: gancho 380px, `.h1` 64px, `.big` 150px, `.desc h3` 60px, cuerpo 26 a 34px, etiquetas 18 a 20px en versalitas con tracking `.2em`.
-- Formas: cajas con borde negro de 2px, sin sombras ni esquinas redondeadas. Resaltado = invertir (fondo tinta, texto papel). Flechas de 2px con punta CSS. Puntos sólidos o huecos en líneas de tiempo.
-- Movimiento: el texto sube enmascarado (`.m[data-t]`), los elementos entran con opacidad + 24 a 30px de desplazamiento, las líneas crecen en anchura. Curvas `out` (exponencial) e `io` (cúbica). Las escenas cruzan con fundido de 0,4s y 18px.
-- Frases cortas en pantalla. Una idea por titular. Sin rayas largas como puntuación.
+- **Every scene with normative content carries `.src`** at the bottom left, in mono: document + pinpoint. E.g. `Model Rules Art. 5.2.1 · Commentary on Art. 5.2.1, para. 15`, `OECD FTA (2016), ch. 3`.
+- **Mark what is illustrative** with `.tag` at the bottom right: `Diagram, not data`, `Example data · EUR m`, `Order of the rules` (translated into the output language). Any figure invented for an example carries `Example data`. Schematic timelines are also mentioned in `.hint`.
+- **Soft law is not binding law.** OECD guidelines are presented as guidance or a model; if you talk about an obligation, cite the national rule or the EU directive that implements it.
+- **No figures from memory** when they can be checked. Thresholds, rates and dates are verified in the source before you animate them. If they could not be verified, say so in the delivery.
+- **Retrieval date** in the last scene when you use the MCP: `Retrieved on <date> via oecd-tax MCP` (in the output language).
+- Do not reproduce long OECD paragraphs: paraphrase and attribute.
 
-## API del motor
+## Visual style (fixed for the whole series)
 
-- `<section class="scene" data-s="inicio,fin">`: ventana de la escena en segundos.
-- `<div class="m" data-t="t0"><div>…</div></div>`: texto que sube enmascarado desde `t0`.
-- `data-a='[["prop",t0,t1,v0,v1,"unidad"], …]'`: animación por propiedad. `prop` puede ser `opacity`, `x`, `y` (px, se combinan en `translate`) o cualquier propiedad CSS (`width` con `"px"`). Varias filas de la misma propiedad se encadenan: la posterior toma el control solo cuando empieza.
-- `window.seek(t)` dibuja el instante `t`; `window.ready` pasa a `true` cuando cargan las fuentes. `?render` quita controles y fija el escenario a 1920x1080 sin escalar.
-- Controles: espacio reproduce o pausa, flechas avanzan un fotograma (1/60 s), R reinicia. Respeta `prefers-reduced-motion`.
-- Para listas largas (bloques, pasos) genera los elementos en JS antes de recoger `scenes/rises/anims`, como hace `tcf.html` con los seis bloques.
+- Background `#FAFAF8`, ink `#0A0A0A`, gray `#666666`, lines `#CCCCCC`, paper `#FFFFFF`. One light theme only; no accent color.
+- Type: Inter (400/500/600) for text, JetBrains Mono for sources, years, technical labels and supporting figures. `font-feature-settings: "tnum"`.
+- Grid: 140px margin left and right. Eyebrow at `top:96px`, headline at `top:190px`, `.rule` 140px from the bottom, `.src`/`.tag` 84px from the bottom.
+- Hierarchy: hook 380px, `.h1` 64px, `.big` 150px, `.desc h3` 60px, body 26 to 34px, labels 18 to 20px in small caps with `.2em` tracking.
+- Shapes: boxes with a 2px black border, no shadows or rounded corners. Highlight = invert (ink background, paper text). 2px arrows with a CSS head. Solid or hollow dots on timelines.
+- Motion: text rises masked (`.m[data-t]`), elements enter with opacity + 24 to 30px offset, lines grow in width. Curves `out` (exponential) and `io` (cubic). Scenes cross-fade over 0.4s and 18px.
+- Short sentences on screen. One idea per headline. No em dashes as punctuation.
 
-## Plantilla
+## Engine API
+
+- `<section class="scene" data-s="start,end">`: the scene window in seconds.
+- `<div class="m" data-t="t0"><div>…</div></div>`: text that rises masked from `t0`.
+- `data-a='[["prop",t0,t1,v0,v1,"unit"], …]'`: per-property animation. `prop` can be `opacity`, `x`, `y` (px, combined into `translate`) or any CSS property (`width` with `"px"`). Several rows for the same property chain: a later row takes over only once it starts.
+- `window.seek(t)` draws instant `t`; `window.ready` turns `true` once the fonts load. `?render` removes the controls and fixes the stage at 1920x1080 without scaling.
+- Controls: space plays or pauses, arrows step one frame (1/60 s), R restarts. Respects `prefers-reduced-motion`.
+- For long lists (blocks, steps) generate the elements in JS before collecting `scenes/rises/anims`, as `tcf.html` does with its six blocks.
+
+## Template
+
+Placeholder text and UI strings are in English: replace them with the output language.
 
 ```html
-<title>NOMBRE DEL TÉRMINO</title>
+<title>TERM NAME</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
-/* Serie taxmotion: un escenario 1920x1080, cada fotograma es función pura de t. Tema claro fijo. */
+/* taxmotion series: one 1920x1080 stage, each frame is a pure function of t. Fixed light theme. */
 :root {
   --bg: #FAFAF8; --ink: #0A0A0A; --mute: #666666; --line: #CCCCCC; --paper: #FFFFFF;
   --sans: "Inter", "Helvetica Neue", Arial, sans-serif;
@@ -102,61 +112,63 @@ body.render .bar, body.render .hint { display: none; }
 .abs { position: absolute; }
 .mono { font-family: var(--mono); }
 .close { font: 600 34px/1.3 var(--sans); border-top: 2px solid var(--ink); padding-top: 20px; }
-/* Estilos propios de las escenas de este término, debajo. */
+/* Styles specific to this term's scenes, below. */
 </style>
 
 <div class="wrap">
   <div class="frame" id="frame">
     <div id="stage">
 
-      <!-- S0 gancho -->
+      <!-- S0 hook -->
       <section class="scene" data-s="0,6">
-        <div class="eyebrow">ÁMBITO <span>· INSTRUMENTO OCDE</span></div>
+        <div class="eyebrow">SCOPE <span>· OECD INSTRUMENT</span></div>
         <div class="abs" style="left:126px; top:230px;">
-          <div class="m" data-t="0.3"><div style="font:600 380px/0.9 var(--sans); letter-spacing:-.06em;">SIGLA</div></div>
+          <div class="m" data-t="0.3"><div style="font:600 380px/0.9 var(--sans); letter-spacing:-.06em;">ACRONYM</div></div>
         </div>
         <div class="abs" style="left:140px; top:620px; width:1400px;">
-          <div class="m" data-t="1.2"><div class="lab">Nombre oficial en inglés · Traducción</div></div>
-          <div class="m" data-t="1.7" style="margin-top:26px;"><div class="h1">Definición en una frase.</div></div>
+          <div class="m" data-t="1.2"><div class="lab">Official English name · Translation</div></div>
+          <div class="m" data-t="1.7" style="margin-top:26px;"><div class="h1">One-sentence definition.</div></div>
         </div>
         <div class="rule"></div>
-        <div class="src">Documento OCDE, artículo o párrafo</div>
+        <div class="src">OECD document, article or paragraph</div>
       </section>
 
-      <!-- S1 ejemplo de escena: titular + elemento que entra + cierre -->
+      <!-- S1 sample scene: headline + entering element + close -->
       <section class="scene" data-s="6,14">
-        <div class="eyebrow">Paso 1 <span>· Qué se mide</span></div>
+        <div class="eyebrow">Step 1 <span>· What is measured</span></div>
         <div class="abs" style="left:140px; top:190px; width:1640px;">
-          <div class="m" data-t="6.4"><div class="h1">Titular de una sola idea.</div></div>
+          <div class="m" data-t="6.4"><div class="h1">A headline with one idea.</div></div>
         </div>
         <div class="abs" style="left:140px; top:420px; width:640px; height:120px; border:2px solid var(--ink); background:var(--paper); display:grid; place-content:center;"
              data-a='[["opacity",7.2,7.7,0,1],["y",7.2,7.9,30,0]]'>
-          <b style="font:600 40px/1 var(--sans);">Elemento</b>
+          <b style="font:600 40px/1 var(--sans);">Element</b>
         </div>
         <div class="abs" style="left:140px; top:780px; width:1640px;">
-          <div class="m" data-t="10"><div class="close">Frase de cierre de la escena.</div></div>
+          <div class="m" data-t="10"><div class="close">Closing sentence of the scene.</div></div>
         </div>
         <div class="rule"></div>
-        <div class="src">Fuente con pinpoint</div>
-        <div class="tag">Datos de ejemplo</div>
+        <div class="src">Source with pinpoint</div>
+        <div class="tag">Example data</div>
       </section>
 
       <div id="prog"></div>
     </div>
   </div>
   <div class="bar">
-    <button id="play" type="button">Pausa</button>
-    <input id="scrub" type="range" min="0" max="14" step="0.01" value="0" aria-label="Línea de tiempo">
+    <button id="play" type="button">Pause</button>
+    <input id="scrub" type="range" min="0" max="14" step="0.01" value="0" aria-label="Timeline">
     <span id="clock">0.0 / 14.0 s</span>
   </div>
-  <div class="hint">Espacio: reproducir o pausar · ← → avanzar un fotograma · R: volver a empezar.</div>
+  <div class="hint">Space: play or pause · ← → step one frame · R: restart.</div>
 </div>
 
 <script>
 (() => {
-  // Duración total: igual al fin de la última escena y al max del deslizador.
+  // Total duration: equal to the end of the last scene and to the slider max.
   const T = 14;
-  // Aquí, si hace falta, generar elementos repetidos (bloques, pasos) antes de recogerlos abajo.
+  // Player button labels, in the output language.
+  const L = { play: 'Play', pause: 'Pause' };
+  // If needed, generate repeated elements (blocks, steps) here, before they are collected below.
 
   const render = /[?&]render/.test(location.search);
   if (render) document.body.classList.add('render');
@@ -186,7 +198,7 @@ body.render .bar, body.render .hint { display: none; }
       let x = 0, y = 0;
       const seen = new Set();
       for (const [prop, t0, t1, v0, v1, unit = ''] of k) {
-        // las filas posteriores de una misma propiedad solo mandan desde que empiezan
+        // later rows for the same property take over only once they start
         if (seen.has(prop) && t < t0) continue;
         seen.add(prop);
         const v = v0 + (v1 - v0) * io(seg(t, t0, t1));
@@ -204,7 +216,7 @@ body.render .bar, body.render .hint { display: none; }
 
   let t = 0, playing = !render && !matchMedia('(prefers-reduced-motion: reduce)').matches, last = null;
   const btn = document.getElementById('play'), scrub = document.getElementById('scrub'), clock = document.getElementById('clock');
-  const show = () => { seek(t); scrub.value = t; clock.textContent = `${t.toFixed(1)} / ${T.toFixed(1)} s`; btn.textContent = playing ? 'Pausa' : 'Reproducir'; };
+  const show = () => { seek(t); scrub.value = t; clock.textContent = `${t.toFixed(1)} / ${T.toFixed(1)} s`; btn.textContent = playing ? L.pause : L.play; };
   const tick = now => {
     if (playing) { if (last !== null) t += (now - last) / 1000; if (t >= T) { t = T; playing = false; } show(); }
     last = now; requestAnimationFrame(tick);
@@ -219,7 +231,7 @@ body.render .bar, body.render .hint { display: none; }
     else if (e.key === 'ArrowLeft') { playing = false; t = Math.max(0, t - 1 / 60); show(); }
     else if (e.key === 'r' || e.key === 'R') { t = 0; playing = true; show(); }
   });
-  // Con movimiento reducido, mostrar un fotograma representativo del gancho.
+  // With reduced motion, show a representative frame of the hook.
   if (!playing && !render) t = 4.5;
   show();
   document.fonts.ready.then(() => { window.ready = true; if (!render) requestAnimationFrame(tick); });
@@ -227,9 +239,9 @@ body.render .bar, body.render .hint { display: none; }
 </script>
 ```
 
-## Exportar a vídeo (opcional)
+## Export to video (optional)
 
-**Opción A, captura directa (recomendada).** El motor ya es determinista, así que basta con fotografiar cada fotograma:
+**Option A, direct capture (recommended).** The engine is already deterministic, so it is enough to screenshot each frame:
 
 ```js
 // capture.mjs: node capture.mjs motion.html 64  →  frames/00000.png …
@@ -249,13 +261,13 @@ for (let i = 0, n = Math.round(T * fps); i <= n; i++) {
 await b.close();
 ```
 
-Luego `ffmpeg -framerate 30 -i frames/%05d.png -c:v libx264 -pix_fmt yuv420p -crf 18 motion.mp4`.
+Then `ffmpeg -framerate 30 -i frames/%05d.png -c:v libx264 -pix_fmt yuv420p -crf 18 motion.mp4`.
 
-**Opción B, Remotion** (cuando quieran editar en React, añadir voz o montar varios motions):
+**Option B, Remotion** (when they want to edit in React, add voice-over or assemble several motions):
 
-- `npx create-video@latest`, composición de 1920x1080 a 30 fps con `durationInFrames = T * 30`.
-- Cada escena es un `<Sequence from={inicio*fps} durationInFrames={(fin-inicio)*fps}>`; dentro, `const t = useCurrentFrame() / fps + inicio`.
-- Reutiliza `seg`, `out` e `io` tal cual (o `interpolate` con `Easing.bezier`), y traduce cada `data-a` a estilos calculados desde `t`. No uses animaciones CSS ni `transition`: Remotion solo ve el fotograma actual.
-- Fuentes con `@remotion/google-fonts/Inter` y `@remotion/google-fonts/JetBrainsMono`; espera a `loadFont()` antes de renderizar.
-- `npx remotion render <Composición> out/motion.mp4`.
-- Mantén las mismas `.src` y `.tag` en pantalla: el rigor no cambia por cambiar de formato.
+- `npx create-video@latest`, a 1920x1080 composition at 30 fps with `durationInFrames = T * 30`.
+- Each scene is a `<Sequence from={start*fps} durationInFrames={(end-start)*fps}>`; inside it, `const t = useCurrentFrame() / fps + start`.
+- Reuse `seg`, `out` and `io` as they are (or `interpolate` with `Easing.bezier`), and translate each `data-a` into styles computed from `t`. Do not use CSS animations or `transition`: Remotion only sees the current frame.
+- Fonts with `@remotion/google-fonts/Inter` and `@remotion/google-fonts/JetBrainsMono`; wait for `loadFont()` before rendering.
+- `npx remotion render <Composition> out/motion.mp4`.
+- Keep the same `.src` and `.tag` on screen: the accuracy rules do not change with the format.
