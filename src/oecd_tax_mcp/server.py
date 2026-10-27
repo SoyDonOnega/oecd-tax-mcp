@@ -470,10 +470,10 @@ def taxmotion_skill() -> str:
     return (_TAXMOTION / "SKILL.md").read_text(encoding="utf-8")
 
 
-@mcp.resource("skill://taxmotion/examples/tcf.html", mime_type="text/html")
+@mcp.resource("skill://taxmotion/assets/tcf.html", mime_type="text/html")
 def taxmotion_example() -> str:
     """Reference motion of the series (Tax Control Frameworks, Spanish)."""
-    return (_TAXMOTION / "examples" / "tcf.html").read_text(encoding="utf-8")
+    return (_TAXMOTION / "assets" / "tcf.html").read_text(encoding="utf-8")
 
 
 @mcp.prompt(name="taxmotion", description="Create an animated motion that explains a tax term")
@@ -487,7 +487,7 @@ def taxmotion_prompt(term: str, language: str = "") -> str:
     return (
         f"Create a taxmotion motion about \"{term}\", {lang}. "
         "Follow these instructions exactly. Use this MCP's oecd_tax_* and oecd_stats_* "
-        "tools as the source, and read the resource skill://taxmotion/examples/tcf.html "
+        "tools as the source, and read the resource skill://taxmotion/assets/tcf.html "
         "as the pattern if your client allows it.\n\n"
         + taxmotion_skill()
     )
