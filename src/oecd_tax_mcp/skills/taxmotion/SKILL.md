@@ -1,13 +1,17 @@
 ---
 name: taxmotion
-description: Creates an explainer motion (animated 1920x1080 HTML video) that illustrates a tax term, in the style of the GloBE/TCF series and with verified OECD sources. Use it when someone asks for a motion, video, animation or visual of a tax concept. The motion is written in the language the user writes in.
+description: Creates an explainer motion (animated 1920x1080 HTML video) that illustrates a tax term, in the style of the GloBE/TCF series and with verified OECD sources. The motion is written in the language the user writes in. Use when the user runs /taxmotion <term> or asks for a motion, video, animation or visual of a tax concept.
+license: MIT
+argument-hint: "<tax term>"
+disable-model-invocation: true
 ---
 
 # Taxmotion
 
 Turns a tax term (GloBE, TCF, DEMPE, permanent establishment, CbCR…) into a motion of 45 to 75 seconds: one self-contained HTML page, 1920x1080, where each frame is a pure function of time `t`. The whole series shares the same engine and the same look, so a new motion reads as part of the collection.
+Paths in this file are relative to the skill root (the folder that contains this SKILL.md).
 
-Series references: `GloBE in Five Steps` (English, Pillar Two) and `examples/tcf.html` (Spanish, Tax Control Frameworks). If you can read `examples/tcf.html`, read it before you write: it is the canonical pattern. Copy its structure and engine, not its language.
+Series references: `GloBE in Five Steps` (English, Pillar Two) and `assets/tcf.html` (Spanish, Tax Control Frameworks). If you can read `assets/tcf.html`, read it before you write: it is the canonical pattern. Copy its structure and engine, not its language.
 
 ## Output language
 
