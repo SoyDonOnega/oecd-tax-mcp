@@ -1,0 +1,27 @@
+[project]
+name = "oecd-tax-mcp"
+version = "0.2.0"
+description = "MCP server for OECD tax soft-law PDFs + SDMX statistics"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "SoyDonOnega" }]
+dependencies = [
+  "mcp>=1.9.0,<2",
+  "httpx>=0.27.0",
+  "pypdf>=5.0.0",
+]
+
+[project.scripts]
+oecd-tax-mcp = "oecd_tax_mcp.server:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/oecd_tax_mcp"]
+
+[tool.hatch.build]
+[tool.hatch.build.targets.sdist]
+include = ["src/oecd_tax_mcp", "data", "README.md"]

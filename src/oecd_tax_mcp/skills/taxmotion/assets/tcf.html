@@ -1,0 +1,304 @@
+<title>Tax Control Frameworks</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Same series look as "GloBE in Five Steps": one 1920x1080 stage, every frame a pure function of t. Single fixed light look. */
+:root {
+  --bg: #FAFAF8; --ink: #0A0A0A; --mute: #666666; --line: #CCCCCC; --paper: #FFFFFF;
+  --sans: "Inter", "Helvetica Neue", Arial, sans-serif;
+  --mono: "JetBrains Mono", "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  color-scheme: light;
+}
+html, body { background: var(--bg); color: var(--ink); }
+body { font-family: var(--sans); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 24px; }
+.wrap { max-width: 1280px; margin: 0 auto; display: grid; gap: 14px; }
+.frame { position: relative; width: 100%; aspect-ratio: 16 / 9; max-width: 100%; overflow: hidden; border: 1px solid var(--line); background: var(--bg); }
+#stage { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0; background: var(--bg); overflow: hidden; font-feature-settings: "tnum" 1; }
+.bar { display: flex; align-items: center; gap: 14px; font: 500 12px/1 var(--mono); color: var(--mute); }
+.bar button { font: 600 11px/1 var(--sans); letter-spacing: .14em; text-transform: uppercase; color: var(--ink); background: var(--paper); border: 1px solid var(--ink); padding: 9px 14px; cursor: pointer; min-width: 84px; }
+.bar button:focus-visible, .bar input:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.bar input[type=range] { flex: 1; min-width: 0; accent-color: #0A0A0A; }
+.hint { font: 400 12px/1.5 var(--mono); color: var(--mute); }
+body.render { padding: 0; }
+body.render .wrap { max-width: none; display: block; }
+body.render .frame { border: 0; width: 1920px; height: 1080px; aspect-ratio: auto; }
+body.render .bar, body.render .hint { display: none; }
+
+.eyebrow { position: absolute; left: 140px; top: 96px; font: 600 20px/1 var(--sans); letter-spacing: .22em; text-transform: uppercase; }
+.eyebrow span { color: var(--mute); }
+.src { position: absolute; left: 140px; bottom: 84px; font: 400 19px/1.4 var(--mono); color: var(--mute); }
+.tag { position: absolute; right: 140px; bottom: 84px; font: 500 17px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--mute); border: 1px solid var(--line); padding: 10px 14px; }
+.rule { position: absolute; left: 140px; right: 140px; bottom: 140px; height: 1px; background: var(--line); }
+#prog { position: absolute; left: 0; bottom: 0; height: 4px; background: var(--ink); width: 0; }
+.scene { position: absolute; inset: 0; opacity: 0; }
+.m { overflow: hidden; display: block; padding-bottom: .08em; }
+.m > * { display: block; will-change: transform; }
+.h1 { font: 600 64px/1.12 var(--sans); letter-spacing: -.02em; }
+.h2 { font: 400 34px/1.35 var(--sans); color: var(--mute); }
+.lab { font: 600 18px/1 var(--sans); letter-spacing: .2em; text-transform: uppercase; color: var(--mute); }
+.abs { position: absolute; }
+.mono { font-family: var(--mono); }
+
+/* S1 parties */
+.party { position: absolute; top: 470px; width: 420px; height: 200px; border: 2px solid var(--ink); background: var(--paper); display: grid; place-content: center; text-align: center; gap: 12px; }
+.party b { font: 600 40px/1.1 var(--sans); letter-spacing: -.01em; }
+.party i { font: 400 20px/1.2 var(--mono); font-style: normal; color: var(--mute); }
+.arrow { position: absolute; height: 2px; background: var(--ink); }
+.arrow::after { content: ""; position: absolute; top: -9px; border: 10px solid transparent; }
+.arrow.r::after { right: -2px; border-left: 16px solid var(--ink); border-right: 0; }
+.arrow.l::after { left: -2px; border-right: 16px solid var(--ink); border-left: 0; }
+.alab { position: absolute; width: 640px; text-align: center; }
+.alab b { display: block; font: 600 30px/1.2 var(--sans); }
+.alab span { display: block; margin-top: 8px; font: 400 22px/1.35 var(--sans); color: var(--mute); }
+
+/* S2 stack of building blocks */
+.blk { position: absolute; left: 140px; width: 640px; height: 76px; }
+.blk > div { position: absolute; inset: 0; display: flex; align-items: center; gap: 22px; padding: 0 26px; border: 2px solid var(--ink); }
+.blk .base { background: var(--paper); color: var(--ink); }
+.blk .on { background: var(--ink); color: var(--paper); }
+.blk em { font: 500 20px/1 var(--mono); font-style: normal; opacity: .6; width: 28px; }
+.blk strong { font: 600 28px/1 var(--sans); letter-spacing: -.01em; }
+.desc { position: absolute; left: 920px; top: 400px; width: 860px; }
+.desc .en { font: 500 20px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--mute); }
+.desc h3 { margin: 22px 0 0; font: 600 60px/1.08 var(--sans); letter-spacing: -.02em; }
+.desc p { margin: 26px 0 0; font: 400 32px/1.4 var(--sans); color: var(--mute); max-width: 820px; }
+
+/* S3 timelines */
+.tl { position: absolute; left: 140px; width: 1640px; }
+.tl .k { font: 600 18px/1 var(--sans); letter-spacing: .2em; text-transform: uppercase; color: var(--mute); }
+.tl .track { position: relative; height: 120px; margin-top: 18px; }
+.tl .ln { position: absolute; left: 0; top: 40px; height: 2px; background: var(--ink); }
+.tl .dot { position: absolute; top: 31px; width: 20px; height: 20px; border-radius: 50%; background: var(--ink); }
+.tl .dot.hollow { background: var(--bg); border: 2px solid var(--ink); }
+.tl .ev { position: absolute; top: 70px; width: 340px; font: 500 24px/1.3 var(--sans); }
+.tl .ev small { display: block; font: 400 19px/1.3 var(--mono); color: var(--mute); margin-top: 4px; }
+.tick { position: absolute; top: 0; width: 2px; height: 26px; background: var(--ink); }
+
+/* S4 Spain */
+.row { position: absolute; left: 140px; width: 1640px; display: grid; grid-template-columns: 200px 1fr; gap: 40px; align-items: baseline; border-top: 1px solid var(--line); padding-top: 26px; }
+.row .y { font: 500 54px/1 var(--mono); letter-spacing: -.02em; }
+.row b { display: block; font: 600 36px/1.2 var(--sans); }
+.row span { display: block; margin-top: 8px; font: 400 26px/1.35 var(--sans); color: var(--mute); }
+</style>
+
+<div class="wrap">
+  <div class="frame" id="frame">
+    <div id="stage">
+
+      <!-- S0 hook -->
+      <section class="scene" data-s="0,6.4">
+        <div class="eyebrow">Cumplimiento cooperativo <span>· OCDE</span></div>
+        <div class="abs" style="left:126px; top:230px;">
+          <div class="m" data-t="0.3"><div style="font:600 380px/0.9 var(--sans); letter-spacing:-.06em;">TCF</div></div>
+        </div>
+        <div class="abs" style="left:140px; top:620px; width:1400px;">
+          <div class="m" data-t="1.2"><div class="lab">Tax Control Framework · Marco de control fiscal</div></div>
+          <div class="m" data-t="1.7" style="margin-top:26px;"><div class="h1">El sistema interno con el que una empresa identifica, gestiona y demuestra su riesgo fiscal.</div></div>
+        </div>
+        <div class="rule"></div>
+        <div class="src">OECD FTA (2016), Co-operative Tax Compliance: Building Better Tax Control Frameworks</div>
+      </section>
+
+      <!-- S1 co-operative compliance -->
+      <section class="scene" data-s="6.4,15.6">
+        <div class="eyebrow">El contexto <span>· Una relación basada en la confianza</span></div>
+        <div class="abs" style="left:140px; top:190px; width:1640px;">
+          <div class="m" data-t="6.8"><div class="h1">Empresa y administración cambian control por transparencia.</div></div>
+        </div>
+        <div class="party" style="left:140px;" data-a='[["opacity",7.4,7.9,0,1],["y",7.4,8,30,0]]'><b>Empresa</b><i>contribuyente</i></div>
+        <div class="party" style="left:1360px;" data-a='[["opacity",7.6,8.1,0,1],["y",7.6,8.2,30,0]]'><b>Administración</b><i>tributaria</i></div>
+        <!-- top arrow: left to right -->
+        <div class="arrow r" style="left:580px; top:530px;" data-a='[["width",8.4,9.4,0,760,"px"]]'></div>
+        <div class="alab" style="left:640px; top:420px;" data-a='[["opacity",9.0,9.5,0,1]]'><b>Transparencia</b><span>comunica sus riesgos fiscales por adelantado</span></div>
+        <!-- bottom arrow: right to left -->
+        <div class="abs" style="left:580px; top:610px; width:760px; height:2px;">
+          <div class="arrow l" style="right:0; top:0;" data-a='[["width",10.0,11.0,0,760,"px"]]'></div>
+        </div>
+        <div class="alab" style="left:640px; top:636px;" data-a='[["opacity",10.6,11.1,0,1]]'><b>Certeza</b><span>respuestas rápidas y menos revisiones a posteriori</span></div>
+        <div class="abs" style="left:140px; top:780px; width:1640px;">
+          <div class="m" data-t="12.2"><div style="font:600 34px/1.3 var(--sans); border-top:2px solid var(--ink); padding-top:20px;">El TCF es lo que hace creíble la parte de la empresa. Sin él, la transparencia es solo una promesa.</div></div>
+        </div>
+        <div class="rule" style="opacity:0"></div>
+      </section>
+
+      <!-- S2 six building blocks: blocks start at 17.0, 4.2s each -->
+      <section class="scene" data-s="15.6,43.2">
+        <div class="eyebrow">Los seis bloques <span>· Cómo se construye</span></div>
+        <div class="abs" style="left:140px; top:190px; width:700px;">
+          <div class="m" data-t="16.0"><div style="font:600 44px/1.15 var(--sans); letter-spacing:-.02em;">De la estrategia a la prueba de que funciona.</div></div>
+        </div>
+        <div id="blocks"></div>
+        <div id="descs"></div>
+        <div class="rule"></div>
+        <div class="src">Building blocks según OCDE FTA (2016), cap. 3</div>
+      </section>
+
+      <!-- S3 from ex post to real time -->
+      <section class="scene" data-s="43.2,53.2">
+        <div class="eyebrow">El resultado <span>· Cuándo se resuelve la duda fiscal</span></div>
+        <div class="abs" style="left:140px; top:190px; width:1640px;">
+          <div class="m" data-t="43.6"><div class="h1">De revisar el pasado a resolver el presente.</div></div>
+        </div>
+        <div class="tl" style="top:350px;" data-a='[["opacity",44.2,44.6,0,1],["opacity",49.4,50,1,0.35]]'>
+          <div class="k">Sin TCF ni cooperación</div>
+          <div class="track">
+            <div class="ln" data-a='[["width",44.4,46,0,1640,"px"]]'></div>
+            <div class="dot" style="left:0;"></div>
+            <div class="ev" style="left:0;">Operación<small>año 1</small></div>
+            <div class="dot" style="left:420px;" data-a='[["opacity",44.9,45.1,0,1]]'></div>
+            <div class="ev" style="left:420px;" data-a='[["opacity",44.9,45.3,0,1]]'>Declaración<small>año 2</small></div>
+            <div class="dot hollow" style="left:1260px;" data-a='[["opacity",45.7,45.9,0,1]]'></div>
+            <div class="ev" style="left:1260px;" data-a='[["opacity",45.7,46.1,0,1]]'>Inspección y discrepancia<small>años 4 a 6</small></div>
+          </div>
+        </div>
+        <div class="tl" style="top:600px;" data-a='[["opacity",46.8,47.2,0,1]]'>
+          <div class="k" style="color:var(--ink);">Con TCF y cumplimiento cooperativo</div>
+          <div class="track">
+            <div class="ln" data-a='[["width",47.0,48.2,0,840,"px"]]'></div>
+            <div class="dot" style="left:0;"></div>
+            <div class="ev" style="left:0;">Operación y consulta<small>año 1, en tiempo real</small></div>
+            <div class="dot" style="left:420px;" data-a='[["opacity",47.6,47.8,0,1]]'></div>
+            <div class="ev" style="left:420px;" data-a='[["opacity",47.6,48,0,1]]'>Declaración sin sorpresas<small>año 2</small></div>
+            <div class="dot hollow" style="left:820px;" data-a='[["opacity",48.1,48.3,0,1]]'></div>
+            <div class="ev" style="left:820px;" data-a='[["opacity",48.1,48.5,0,1]]'>Revisión ligera<small>riesgo ya conocido</small></div>
+          </div>
+        </div>
+        <div class="abs" style="left:1340px; top:668px; width:440px;">
+          <div class="m" data-t="49.6"><div style="font:600 30px/1.3 var(--sans); border-top:2px solid var(--ink); padding-top:18px;">La administración dedica sus recursos a quien más riesgo presenta.</div></div>
+        </div>
+        <div class="rule"></div>
+        <div class="tag">Esquema, no datos</div>
+      </section>
+
+      <!-- S4 Spain -->
+      <section class="scene" data-s="53.2,64">
+        <div class="eyebrow">En España <span>· Cómo se aterriza</span></div>
+        <div class="abs" style="left:140px; top:190px; width:1640px;">
+          <div class="m" data-t="53.6"><div class="h1">Tres piezas que traducen el TCF a la práctica.</div></div>
+        </div>
+        <div class="row" style="top:340px;" data-a='[["opacity",54.2,54.7,0,1],["y",54.2,54.9,24,0]]'><div class="y">2010</div><div><b>Código de Buenas Prácticas Tributarias</b><span>Foro de Grandes Empresas y AEAT. Adhesión voluntaria.</span></div></div>
+        <div class="row" style="top:500px;" data-a='[["opacity",55.0,55.5,0,1],["y",55.0,55.7,24,0]]'><div class="y">2016</div><div><b>Informe anual de transparencia fiscal</b><span>Lo presentan las empresas adheridas, y documenta su estrategia y sus riesgos.</span></div></div>
+        <div class="row" style="top:660px;" data-a='[["opacity",55.8,56.3,0,1],["y",55.8,56.5,24,0]]'><div class="y">2019</div><div><b>Norma UNE 19602</b><span>Sistemas de gestión de compliance tributario. Certificable.</span></div></div>
+        <div class="abs" style="left:140px; top:850px; width:1640px;" data-a='[["opacity",57.6,58.2,0,1]]'>
+          <div style="font:600 30px/1.2 var(--sans);">Un TCF no elimina el riesgo fiscal. Lo hace visible y gobernable.</div>
+        </div>
+        <div class="src" style="bottom:60px;">OCDE FTA (2013, 2016) · AEAT · UNE</div>
+      </section>
+
+      <div id="prog"></div>
+    </div>
+  </div>
+  <div class="bar">
+    <button id="play" type="button">Pausa</button>
+    <input id="scrub" type="range" min="0" max="64" step="0.01" value="0" aria-label="Línea de tiempo">
+    <span id="clock">0.0 / 64.0 s</span>
+  </div>
+  <div class="hint">Espacio: reproducir o pausar · ← → avanzar un fotograma · R: volver a empezar. Los plazos de la escena de líneas de tiempo son ilustrativos.</div>
+</div>
+
+<script>
+(() => {
+  // Six building blocks (OECD FTA 2016). Built bottom-up: strategy is the foundation.
+  const B = [
+    ['Tax strategy established', 'Estrategia fiscal', 'El consejo aprueba una estrategia fiscal documentada: apetito de riesgo, principios y forma de relacionarse con la administración.'],
+    ['Applied comprehensively', 'Aplicación integral', 'Cubre todas las actividades y transacciones del grupo, no solo la preparación de la declaración.'],
+    ['Responsibility assigned', 'Responsabilidades asignadas', 'Cada riesgo tiene un responsable con funciones claras, recursos y formación suficientes.'],
+    ['Governance documented', 'Gobernanza documentada', 'Normas, procedimientos y registros que permiten reconstruir cada decisión fiscal.'],
+    ['Testing performed', 'Pruebas periódicas', 'Los controles se prueban y se monitorizan. Los fallos se detectan y se corrigen.'],
+    ['Assurance provided', 'Aseguramiento', 'La empresa puede demostrar, ante su consejo y ante la administración, que el marco funciona.']
+  ];
+  const T0 = 17.0, D = 4.2, END = 43.2;
+  const bh = document.getElementById('blocks'), dh = document.getElementById('descs');
+  B.forEach(([en, es, txt], i) => {
+    const a = T0 + i * D, z = a + D, last = i === B.length - 1;
+    const top = 840 - i * 88;
+    const blk = document.createElement('div');
+    blk.className = 'blk'; blk.style.top = top + 'px';
+    blk.dataset.a = JSON.stringify([['opacity', a, a + .3, 0, 1], ['y', a, a + .6, -120, 0]]);
+    const on = last ? [['opacity', a, a + .3, 0, 1], ['opacity', END - 4.5, END - 3.6, 1, 0]] : [['opacity', a, a + .3, 0, 1], ['opacity', z, z + .4, 1, 0]];
+    blk.innerHTML = `<div class="base"><em>${i + 1}</em><strong>${es}</strong></div><div class="on" data-a='${JSON.stringify(on)}'><em>${i + 1}</em><strong>${es}</strong></div>`;
+    bh.appendChild(blk);
+    const d = document.createElement('div');
+    d.className = 'desc';
+    d.dataset.a = JSON.stringify(last
+      ? [['opacity', a + .2, a + .7, 0, 1], ['y', a + .2, a + .8, 30, 0], ['opacity', END - 4.5, END - 3.6, 1, 0]]
+      : [['opacity', a + .2, a + .7, 0, 1], ['y', a + .2, a + .8, 30, 0], ['opacity', z - .3, z, 1, 0]]);
+    d.innerHTML = `<div class="en">${i + 1} / 6 · ${en}</div><h3>${es}</h3><p>${txt}</p>`;
+    dh.appendChild(d);
+  });
+  // closing beat of the stack scene: all six together
+  const fin = document.createElement('div');
+  fin.className = 'desc';
+  fin.dataset.a = JSON.stringify([['opacity', END - 3.4, END - 2.8, 0, 1], ['y', END - 3.4, END - 2.7, 30, 0]]);
+  fin.innerHTML = `<div class="en">6 / 6 · Framework</div><h3>Un solo marco, integrado en el control interno.</h3><p>Ningún bloque funciona aislado. La OCDE lo plantea como parte del sistema de control interno de la empresa, no como un anexo fiscal.</p>`;
+  dh.appendChild(fin);
+
+  const T = 64;
+  const render = /[?&]render/.test(location.search);
+  if (render) document.body.classList.add('render');
+  const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+  const seg = (t, a, b) => clamp((t - a) / (b - a));
+  const out = x => x <= 0 ? 0 : x >= 1 ? 1 : 1 - Math.pow(2, -10 * x) * (1 - x * 0.001);
+  const io = x => x <= 0 ? 0 : x >= 1 ? 1 : x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+
+  const scenes = [...document.querySelectorAll('.scene')].map(el => ({ el, s: el.dataset.s.split(',').map(Number) }));
+  const rises = [...document.querySelectorAll('.m[data-t]')].map(el => ({ inner: el.firstElementChild, t: +el.dataset.t }));
+  const anims = [...document.querySelectorAll('[data-a]')].map(el => ({ el, k: JSON.parse(el.dataset.a) }));
+  const prog = document.getElementById('prog');
+
+  window.seek = t => {
+    for (const { el, s } of scenes) {
+      const a = s[0] === 0 ? 1 : out(seg(t, s[0], s[0] + .4)), b = io(seg(t, s[1] - .45, s[1]));
+      const o = s[1] >= T ? a : a * (1 - b);
+      el.style.opacity = o;
+      el.style.transform = `translateY(${(1 - a) * 18 - (s[1] >= T ? 0 : b * 18)}px)`;
+      el.style.visibility = o > 0 ? 'inherit' : 'hidden';
+    }
+    for (const { inner, t: t0 } of rises) {
+      const p = out(seg(t, t0, t0 + .7));
+      inner.style.transform = `translateY(${(1 - p) * 108}%)`;
+    }
+    for (const { el, k } of anims) {
+      let x = 0, y = 0;
+      const seen = new Set();
+      for (const [prop, t0, t1, v0, v1, unit = ''] of k) {
+        // later keyframes of the same property take over only once they start
+        if (seen.has(prop) && t < t0) continue;
+        seen.add(prop);
+        const v = v0 + (v1 - v0) * io(seg(t, t0, t1));
+        if (prop === 'x') x = v; else if (prop === 'y') y = v;
+        else el.style[prop] = v + unit;
+      }
+      if (k.some(r => r[0] === 'x' || r[0] === 'y')) el.style.transform = `translate(${x}px, ${y}px)`;
+    }
+    prog.style.width = (t / T * 100) + '%';
+  };
+
+  const frame = document.getElementById('frame'), stage = document.getElementById('stage');
+  const fit = () => { if (!render) stage.style.transform = `scale(${frame.clientWidth / 1920})`; };
+  addEventListener('resize', fit); fit();
+
+  let t = 0, playing = !render && !matchMedia('(prefers-reduced-motion: reduce)').matches, last = null;
+  const btn = document.getElementById('play'), scrub = document.getElementById('scrub'), clock = document.getElementById('clock');
+  const show = () => { seek(t); scrub.value = t; clock.textContent = `${t.toFixed(1)} / ${T.toFixed(1)} s`; btn.textContent = playing ? 'Pausa' : 'Reproducir'; };
+  const tick = now => {
+    if (playing) { if (last !== null) t += (now - last) / 1000; if (t >= T) { t = T; playing = false; } show(); }
+    last = now; requestAnimationFrame(tick);
+  };
+  const toggle = () => { if (t >= T) t = 0; playing = !playing; show(); };
+  btn.addEventListener('click', toggle);
+  scrub.addEventListener('input', () => { t = +scrub.value; playing = false; show(); });
+  addEventListener('keydown', e => {
+    if (render) return;
+    if (e.code === 'Space') { e.preventDefault(); toggle(); }
+    else if (e.key === 'ArrowRight') { playing = false; t = Math.min(T, t + 1 / 60); show(); }
+    else if (e.key === 'ArrowLeft') { playing = false; t = Math.max(0, t - 1 / 60); show(); }
+    else if (e.key === 'r' || e.key === 'R') { t = 0; playing = true; show(); }
+  });
+  if (!playing && !render) t = 4.5;
+  show();
+  document.fonts.ready.then(() => { window.ready = true; if (!render) requestAnimationFrame(tick); });
+})();
+</script>
